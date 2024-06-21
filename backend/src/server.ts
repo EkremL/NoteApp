@@ -1,12 +1,7 @@
-import "dotenv/config";
+//?appı artık ayırdık ve buradan import ettik
+import app from "./app";
 import env from "./util/validateEnv";
 import mongoose from "mongoose";
-import express from "express";
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("Hello World!!");
-});
 
 // const port = process.env.PORT;
 //!envalid kurduktan sonra ve ayarı yaptıktan sonra process i burada ve connectte kaldırdık
