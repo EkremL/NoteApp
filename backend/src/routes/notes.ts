@@ -11,6 +11,10 @@ router.get("/", NotesController.getNotes);
 router.post("/", NotesController.createNote);
 //!get single note route
 router.get("/:noteId", NotesController.getSingleNote);
+//!update route
+router.patch("/:noteId", NotesController.updateNote);
+//!delete route
+router.delete("/:noteId", NotesController.deleteNote);
 
 //1. yöntem (eğer sadece 1 fonksiyon varsa kullanılabilir ama karmaşık ve birden fazla olanlarda yukardaki kullanılır)
 
