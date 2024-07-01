@@ -6,10 +6,12 @@ import morgan from "morgan";
 import createHttpError, { isHttpError } from "http-errors";
 //morganı import edince hata vericek cunku typescript projesi icin npm i --save-dev @types/morgan de kurmamız gerek
 
+import cors from "cors";
+
 const app = express();
 
 app.use(morgan("dev"));
-
+app.use(cors());
 app.use(express.json());
 
 //!artık yeni middlewareyi ekliyoruz ve endpointi belirtiyoruz
