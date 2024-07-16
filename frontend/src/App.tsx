@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Note as NoteModel } from "./models/note";
 import Note from "./components/Note";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import * as NotesApi from "./network/notes_api";
 import AddEditNoteDialog from "./components/AddEditNoteDialog";
 import styles from "./styles/NotesPage.module.css";
@@ -10,6 +10,8 @@ import { FaPlus } from "react-icons/fa";
 
 function App() {
   const [notes, setNotes] = useState<NoteModel[]>([]);
+  const [notesLoading, setNotesLoading] = useState(true);
+  const [showNotesLoadingError, setShowNotesLoadingError] = useState(false);
 
   const [showAddNoteDialog, setShowAddNoteDialog] = useState(false);
   const [noteToEdit, setNoteToEdit] = useState<NoteModel | null>(null);
@@ -17,11 +19,15 @@ function App() {
   useEffect(() => {
     async function loadNotes() {
       try {
+        setShowNotesLoadingError(false);
+        setNotesLoading(true);
         const notes = await NotesApi.fetchNotes(); //network içerisindeki notes api içerisindeki fetchi buradan çağırdık, her zamankinden farklı bir yöntem
         setNotes(notes); //!state updating
       } catch (error) {
         console.error("Error fetching notes:", error);
-        alert(error);
+        setShowNotesLoadingError(true);
+      } finally {
+        setNotesLoading(false);
       }
     }
     loadNotes();
@@ -37,9 +43,25 @@ function App() {
     }
   }
 
+  const notesGrid = (
+    <Row xs={1} md={2} xl={3} className={`g-4 ${styles.noteGrid}`}>
+      {notes.map((note) => (
+        <Col key={note._id}>
+          <Note
+            note={note}
+            className={styles.note}
+            onDeleteNoteClicked={deleteNote}
+            onNoteClicked={setNoteToEdit}
+          />
+          {/* <Note> içerisindeki classname, Note.tsx de oluşturduğumuz classname, böylece componente dışarıdan bir css dosyası ekleyebildik */}
+        </Col>
+      ))}
+    </Row>
+  );
+
   return (
     <>
-      <Container>
+      <Container className={styles.notesPage}>
         <Button
           className={`mb-4 ${styleUtils.blockCenter} ${styleUtils.flexCenter}`}
           onClick={() => setShowAddNoteDialog(true)}
@@ -47,19 +69,19 @@ function App() {
           <FaPlus />
           Add New Note
         </Button>
-        <Row xs={1} md={2} xl={3} className="g-4">
-          {notes.map((note) => (
-            <Col key={note._id}>
-              <Note
-                note={note}
-                className={styles.note}
-                onDeleteNoteClicked={deleteNote}
-                onNoteClicked={setNoteToEdit}
-              />
-              {/* <Note> içerisindeki classname, Note.tsx de oluşturduğumuz classname, böylece componente dışarıdan bir css dosyası ekleyebildik */}
-            </Col>
-          ))}
-        </Row>
+        {notesLoading && <Spinner animation="border" variant="primary" />}
+        {showNotesLoadingError && (
+          <p>Something went wrong, please refresh the page</p>
+        )}
+        {!notesLoading && !showNotesLoadingError && (
+          <>
+            {notes.length > 0 ? (
+              notesGrid
+            ) : (
+              <p>You dont have any notes yet. :(</p>
+            )}
+          </>
+        )}
         {showAddNoteDialog && (
           <AddEditNoteDialog
             onDismiss={() => setShowAddNoteDialog(false)}
