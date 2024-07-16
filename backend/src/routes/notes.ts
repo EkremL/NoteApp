@@ -16,8 +16,6 @@ router.patch("/:noteId", NotesController.updateNote);
 //!delete route
 router.delete("/:noteId", NotesController.deleteNote);
 
-//1. yöntem (eğer sadece 1 fonksiyon varsa kullanılabilir ama karmaşık ve birden fazla olanlarda yukardaki kullanılır)
-
 //2. yöntem (eğer sadece 1 fonksiyon varsa kullanılabilir ama karmaşık ve birden fazla olanlarda yukardaki kullanılır)
 
 // import { getNotes } from "../controllers/notes";
