@@ -2,11 +2,14 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 // import NoteModel from "./models/note";
 import notesRoutes from "./routes/notes";
+import userRoutes from "./routes/users";
 import morgan from "morgan";
 import createHttpError, { isHttpError } from "http-errors";
-//morganı import edince hata vericek cunku typescript projesi icin npm i --save-dev @types/morgan de kurmamız gerek
-
 import cors from "cors";
+import session from "express-session";
+//morganı import edince hata vericek cunku typescript projesi icin npm i --save-dev @types/morgan de kurmamız gerek
+import env from "./util/validateEnv";
+import MongoStore from "connect-mongo";
 
 const app = express();
 
@@ -14,8 +17,28 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 
+//!express-session'u express ile routeler arasına middleware olarak ekliyoruz
+app.use(
+  session({
+    secret: env.SESSION_SECRET,
+    resave: false, //session değerlerini yeniden kaydetmek için
+    saveUninitialized: false, //session oluşmadığında otomatik olarak bir session oluşturmak için,
+    cookie: {
+      maxAge: 60 * 60 * 1000, // sessionın süresi 1 saat
+      httpOnly: true, // client-side'e session'ı göndermeyecek
+      secure: false, // https üzerinde çalışırsa true, http üzerinde çalışırsa false
+      sameSite: "lax", // sameSite cookie policy, "lax" ve "none" değerlerine göre cookie gönderilecek veya gönderilmeyecek
+    },
+    rolling: true, // session değerlerini yeniden kaydetmek için
+    store: MongoStore.create({
+      mongoUrl: env.MONGO_CONNECTION_STRING,
+    }),
+  })
+);
+
 //!artık yeni middlewareyi ekliyoruz ve endpointi belirtiyoruz
 app.use("/api/notes", notesRoutes);
+app.use("/api/users", userRoutes);
 
 // app.get("/", async (req, res, next) => {
 //   try {
