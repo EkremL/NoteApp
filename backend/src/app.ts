@@ -25,9 +25,6 @@ app.use(
     saveUninitialized: false, //session oluşmadığında otomatik olarak bir session oluşturmak için,
     cookie: {
       maxAge: 60 * 60 * 1000, // sessionın süresi 1 saat
-      httpOnly: true, // client-side'e session'ı göndermeyecek
-      secure: false, // https üzerinde çalışırsa true, http üzerinde çalışırsa false
-      sameSite: "lax", // sameSite cookie policy, "lax" ve "none" değerlerine göre cookie gönderilecek veya gönderilmeyecek
     },
     rolling: true, // session değerlerini yeniden kaydetmek için
     store: MongoStore.create({
@@ -37,8 +34,8 @@ app.use(
 );
 
 //!artık yeni middlewareyi ekliyoruz ve endpointi belirtiyoruz
-app.use("/api/notes", notesRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/notes", notesRoutes); //burada da authenticaton kontrolu icin middleware ekledik artık bütün note endpointleri de korunmuş oldu
 
 // app.get("/", async (req, res, next) => {
 //   try {
