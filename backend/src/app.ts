@@ -10,23 +10,31 @@ import session from "express-session";
 //morganı import edince hata vericek cunku typescript projesi icin npm i --save-dev @types/morgan de kurmamız gerek
 import env from "./util/validateEnv";
 import MongoStore from "connect-mongo";
+import { requiresAuth } from "./middleware/auth";
 
 const app = express();
 
 app.use(morgan("dev"));
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Frontend'in çalıştığı URL
+    credentials: true,
+  })
+);
 
+app.use(express.json());
 //!express-session'u express ile routeler arasına middleware olarak ekliyoruz
 app.use(
   session({
     secret: env.SESSION_SECRET,
-    resave: false, //session değerlerini yeniden kaydetmek için
-    saveUninitialized: false, //session oluşmadığında otomatik olarak bir session oluşturmak için,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      maxAge: 60 * 60 * 1000, // sessionın süresi 1 saat
+      maxAge: 60 * 60 * 1000,
+      httpOnly: true,
+      secure: false, // Secure only in production
     },
-    rolling: true, // session değerlerini yeniden kaydetmek için
+    rolling: true,
     store: MongoStore.create({
       mongoUrl: env.MONGO_CONNECTION_STRING,
     }),
@@ -35,7 +43,7 @@ app.use(
 
 //!artık yeni middlewareyi ekliyoruz ve endpointi belirtiyoruz
 app.use("/api/users", userRoutes);
-app.use("/api/notes", notesRoutes); //burada da authenticaton kontrolu icin middleware ekledik artık bütün note endpointleri de korunmuş oldu
+app.use("/api/notes", requiresAuth, notesRoutes); //burada da authenticaton kontrolu icin middleware ekledik artık bütün note endpointleri de korunmuş oldu
 
 // app.get("/", async (req, res, next) => {
 //   try {

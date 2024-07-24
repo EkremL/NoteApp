@@ -5,7 +5,7 @@ import SignUpModal from "./components/SignUpModal";
 import styles from "./styles/NotesPage.module.css";
 import { User } from "./models/user";
 import { useEffect, useState } from "react";
-import * as UsersApi from "./network/users_api";
+import * as NotesApi from "./network/notes_api";
 import NotesPageLoggedInView from "./components/NotesPageLoggedInView";
 import NotesPageLoggedOutPageView from "./components/NotesPageLoggedOutPageView";
 
@@ -17,9 +17,10 @@ function App() {
   useEffect(() => {
     async function fetchLoggedInUser() {
       try {
-        const user = await UsersApi.getLoggedInUser();
+        const user = await NotesApi.getLoggedInUser();
         setLoggedInUser(user);
       } catch (error) {
+        console.log("kullanıcı giriş yapmadı");
         console.error(error);
       }
     }

@@ -1,9 +1,14 @@
 import { Note } from "../models/note";
 import { User } from "../models/user";
 
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
 async function fetchData(input: RequestInfo, init?: RequestInit) {
   //buradaki parametreleri fetch içindeki typelara bakıp yazdık
-  const response = await fetch(input, init);
+  const response = await fetch(input, {
+    ...init,
+    credentials: "include", // Oturum kimlik doğrulaması için çerezleri ekler
+  });
   if (response.ok) {
     return response;
   } else {
@@ -14,7 +19,7 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
 }
 
 export async function getLoggedInUser(): Promise<User> {
-  const response = await fetchData("http://localhost:5000/api/users", {
+  const response = await fetchData(`${apiUrl}/api/users`, {
     method: "GET",
   });
   return response.json();
@@ -27,7 +32,7 @@ export interface SignUpCredentials {
 }
 
 export async function signUp(credentials: SignUpCredentials): Promise<User> {
-  const response = await fetchData("http://localhost:5000/api/users/signup", {
+  const response = await fetchData(`${apiUrl}/api/users/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +48,7 @@ export interface LoginCredentials {
 }
 
 export async function login(credentials: LoginCredentials): Promise<User> {
-  const response = await fetchData("http://localhost:5000/api/users/login", {
+  const response = await fetchData(`${apiUrl}/api/users/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -54,7 +59,7 @@ export async function login(credentials: LoginCredentials): Promise<User> {
 }
 
 export async function logout() {
-  await fetchData("http://localhost:5000/api/users/logout", {
+  await fetchData(`${apiUrl}/api/users/logout`, {
     method: "POST",
   });
 }
@@ -62,18 +67,19 @@ export async function logout() {
 //?GET ALL NOTES FETCH
 //!async functionlar daima promise döner
 export async function fetchNotes(): Promise<Note[]> {
-  const response = await fetchData("http://localhost:5000/api/notes", {
+  const response = await fetchData(`${apiUrl}/api/notes`, {
     method: "GET",
   });
-  return await response.json();
+  return response.json();
 }
+
 //?CREATE A NEW NOTE FETCH
 export interface NoteInput {
   title: string;
   text?: string;
 }
 export async function createNote(note: NoteInput): Promise<Note> {
-  const response = await fetchData(`http://localhost:5000/api/notes`, {
+  const response = await fetchData(`${apiUrl}/api/notes`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -86,7 +92,7 @@ export async function createNote(note: NoteInput): Promise<Note> {
 //?DELETE NOTE FETCH
 
 export async function deleteNote(noteId: string): Promise<void> {
-  await fetchData(`http://localhost:5000/api/notes/${noteId}`, {
+  await fetchData(`${apiUrl}/api/notes/` + noteId, {
     method: "DELETE",
   });
 }
@@ -97,15 +103,12 @@ export async function updateNote(
   noteId: string,
   note: NoteInput
 ): Promise<Note> {
-  const response = await fetchData(
-    `http://localhost:5000/api/notes/${noteId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(note),
-    }
-  );
+  const response = await fetchData(`${apiUrl}/api/notes/` + noteId, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(note),
+  });
   return response.json();
 }
