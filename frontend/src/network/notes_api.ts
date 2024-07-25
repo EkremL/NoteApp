@@ -1,3 +1,4 @@
+import { ConflictError, UnAuthorizedError } from "../errors/http_errors";
 import { Note } from "../models/note";
 import { User } from "../models/user";
 
@@ -14,7 +15,21 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
   } else {
     const errorBody = await response.json();
     const errorMessage = errorBody.error;
-    throw Error(errorMessage);
+    //! kendi yazdigimiz custom hata status kodlari
+    if (response.status === 401) {
+      throw new UnAuthorizedError(errorMessage);
+    } else if (response.status === 409) {
+      throw new ConflictError(errorMessage);
+    }
+    //!burası da normal Error classındaki error
+    else {
+      throw Error(
+        "Request failed with status " +
+          response.status +
+          "message: " +
+          errorMessage
+      );
+    }
   }
 }
 
